@@ -13,6 +13,9 @@ class Player(enum.Enum):
     def other(self):
         return Player.black if self == Player.white else Player.white
 
+    def __str__(self):
+        return "white" if self == Player.white else "black"
+
 
 #class Point(NamedTuple):
 #    row: int
