@@ -38,6 +38,13 @@ def point_from_coords(coords):
     return gotypes.Point(row=row, col=col)
 
 
+def coords_from_point(point):
+    return '%s%d' % (
+        COLS[point.col - 1],
+        point.row
+    )
+
+
 class MoveAge:
     def __init__(self, board):
         self.move_ages = -np.ones((board.num_rows, board.num_cols))
