@@ -127,3 +127,5 @@ dmypy.json
 .idea/
 
 /data
+/agents/deep_bot.h5
+/test_samples.py
