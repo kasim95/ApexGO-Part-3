@@ -1,5 +1,5 @@
 import numpy as np
-from keras import backend as K
+# from keras import backend as K
 from keras.optimizers import SGD
 
 from dlgo.agent.base import Agent
@@ -12,20 +12,24 @@ from dlgo import kerasutil
 # 9.7
 class PolicyAgent(Agent):
     def __init__(self, model, encoder):
-        self.model = model      # A Keras Sequential model instance
-        self.encoder = encoder  # Implements the Encoder interface
+        Agent.__init__(self)
+        self._model = model      # A Keras Sequential model instance
+        self._encoder = encoder  # Implements the Encoder interface
+        self._collector = None
 
     def set_collector(self, collector):  # 9.17
         self._collector = collector      # Allows the self-play driver program to attach a collector to the agent
 
     def select_move(self, game_state):  # 9.12 and 9.17
         board_tensor = self._encoder.encode(game_state)
-        X = np.array([board_tensor])            # The Keras Predict call makes batch predictions,
-        move_probs = self.model(X)[0]           # so you wrap your single board in an array and
-        move_probs = clip_probs(move_probs)     # pull out the first item the resulting array
+        x = np.array([board_tensor])            # The Keras Predict call makes batch predictions,
+        move_probs = self._model(x)[0]           # so you wrap your single board in an array and
+        # move_probs = clip_probs(move_probs)     # pull out the first item the resulting array
+        eps = 1e-5
+        move_probs = np.clip(move_probs, eps, 1 - eps)
 
         num_moves = self._encoder.board_width * self._encoder.board_height
-        candidates = np.arrange(num_moves)  # Creates an array containing the index of every point on the board
+        candidates = np.arange(num_moves)  # Creates an array containing the index of every point on the board
 
         ranked_moves = np.random.choice(    # Samples from the points on the board according to the policy,
             candidates, num_moves, replace=False, p=move_probs)     # creates a ranked list of points to try
@@ -47,14 +51,14 @@ class PolicyAgent(Agent):
 
     def serialize(self, h5file):    # 9.9
         h5file.create_group('encoder')  # stores enough information to reconstruct the board encoder
-        h5file['encoder'].attrs['name'] = self.encoder.name()
-        h5file['encoder'].attrs['board_width'] = self.encoder.board_width
-        h5file['encoder'].attrs['board_height'] = self.encoder.board_height
+        h5file['encoder'].attrs['name'] = self._encoder.name()
+        h5file['encoder'].attrs['board_width'] = self._encoder.board_width
+        h5file['encoder'].attrs['board_height'] = self._encoder.board_height
         h5file.create_group('model')    # Uses build in Keras features to persist the model and its weights
         kerasutil.save_model_to_hdf5_group(
-            self.model, h5file['model'])
+            self._model, h5file['model'])
 
-    def prepare_experience_data(experience, board_width, board_height):     # 10.5
+    def prepare_experience_data(self, experience, board_width, board_height):     # 10.5
         experience_size = experience.actions.shape[0]
         target_vectors = np.zeros((experience_size, board_width * board_height))
         for i in range(experience_size):
@@ -68,7 +72,7 @@ class PolicyAgent(Agent):
             loss='categorical_crossentropy',    # The compile method assigns an optimizer to the model;
             optimizer=SGD(lr=lr, clipnorm=clipnorm))    # in this case, the SGD (stochastic gradient descent)
 
-        target_vectors = prepare_experience_data(
+        target_vectors = self.prepare_experience_data(
             experience, self._encoder.board_width, self._encoder.board_height)
 
         self._model.fit(
