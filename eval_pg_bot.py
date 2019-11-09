@@ -1,5 +1,5 @@
-import argparse
-import datetime
+# import argparse
+# import datetime
 from collections import namedtuple
 
 import h5py
@@ -69,6 +69,14 @@ def simulate_game(black_player, white_player):
 
 
 def main():         # 10.8
+    # PLACEHOLDER VARIABLES (CHANGE BEFORE RUNNING SCRIPT)
+    agent1filepath = ""
+    agent2filepath = ""
+    agent1 = agent.load_policy_agent(h5py.File(agent1filepath))
+    agent2 = agent.load_policy_agent(h5py.File(agent2filepath))
+    num_games = 50
+    #
+
     wins = 0        # This script tracks wins and losses from the point of view of agent1
     losses = 0
     color1 = Player.black      # color1 = black, color2 = white
