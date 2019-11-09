@@ -1,12 +1,15 @@
+import argparse
+import h5py
 
 from keras.models import Model
 from keras.layers import Conv2D, Dense, Flatten, Input
-
+import dlgo.networks
 from dlgo import encoders
-
+from dlgo import rl
 
 # 12.5
 def main():
+    """
     board_input = Input(shape=encoder.shape(), name='board_input')
 
     # Add as many convolutional layers as you like
@@ -36,6 +39,35 @@ def main():
 
     model = Model(inputs=board_input,
                   outputs=[policy_output, value_output])
+    """
+    # added from gh repo
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--board-size', type=int, default=19)
+    parser.add_argument('--network', default='large')
+    parser.add_argument('--hidden-size', type=int, default=512)
+    parser.add_argument('output_file')
+    args = parser.parse_args()
+
+    encoder = encoders.get_encoder_by_name('sevenplane', args.board_size)
+    board_input = Input(shape=encoder.shape(), name='board_input')
+
+    processed_board = board_input
+    network = getattr(dlgo.networks, args.network)
+    for layer in network.layers(encoder.shape()):
+        processed_board = layer(processed_board)
+
+    policy_hidden_layer = Dense(args.hidden_size, activation='relu')(processed_board)
+    policy_output = Dense(encoder.num_points(), activation='softmax')(policy_hidden_layer)
+
+    value_hidden_layer = Dense(args.hidden_size, activation='relu')(processed_board)
+    value_output = Dense(1, activation='tanh')(value_hidden_layer)
+
+    model = Model(inputs=[board_input], outputs=[policy_output, value_output])
+
+    new_agent = rl.ACAgent(model, encoder)
+    with h5py.File(args.output_file, 'w') as outf:
+        new_agent.serialize(outf)
+    #
 
 
 if __name__ == '__main__':

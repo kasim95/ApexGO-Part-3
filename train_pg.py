@@ -10,7 +10,7 @@ def main():
     experience_files = ["", ""]
     learning_rate = 0.0001
     clipnorm = 0.5
-    batchsize = 128
+    batchsize = 1024
     updated_agent_filename = "something"
     #
     learning_agent = agent.load_policy_agent(h5py.File(learning_agent_filename))  # 10.7
