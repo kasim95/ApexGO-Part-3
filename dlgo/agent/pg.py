@@ -8,6 +8,11 @@ from dlgo import encoders
 from dlgo import goboard
 from dlgo import kerasutil
 
+__all__ = [
+    'PolicyAgent',
+    'load_policy_agent',
+]
+
 
 # 9.7
 class PolicyAgent(Agent):
@@ -58,7 +63,8 @@ class PolicyAgent(Agent):
         kerasutil.save_model_to_hdf5_group(
             self._model, h5file['model'])
 
-    def prepare_experience_data(self, experience, board_width, board_height):     # 10.5
+    @staticmethod
+    def prepare_experience_data(experience, board_width, board_height):     # 10.5
         experience_size = experience.actions.shape[0]
         target_vectors = np.zeros((experience_size, board_width * board_height))
         for i in range(experience_size):
