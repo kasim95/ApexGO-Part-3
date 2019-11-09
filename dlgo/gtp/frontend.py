@@ -3,7 +3,7 @@ import sys
 from dlgo.gtp import command, response
 from dlgo.gtp.board import coords_to_gtp_position, gtp_position_to_coords
 from dlgo.goboard_fast import GameState, Move
-from utils import print_board
+from ..utils import print_board
 
 __all__ = ['GTPFrontend']
 

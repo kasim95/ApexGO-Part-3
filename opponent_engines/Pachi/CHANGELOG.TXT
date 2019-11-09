@@ -1,0 +1,31 @@
+Pachi 12.40:
+- speedup, about 20% faster
+- multiple dcnns support: detlef44, detlef54, darkforest
+- lz-genmove_analyze support (get winrates in sabaki etc)
+- lz-analyze: handle frequency
+- set engine options over gtp (pachi-setoption)
+- dcnn pondering fix
+
+Pachi 12.30:
+- lizzie support !
+- dcnn pondering
+- japanese rules: territory scoring in playouts
+- full gtp undo
+
+Pachi 12.20:
+- dcnn: handle smaller board sizes
+- don't play slack when taking handicap
+- mm patterns fixes, better prediction rate
+- use joseki engine when playing without dcnn
+
+Pachi 12.10:
+- mm patterns
+- playouts: handle bent-four, special sekis
+- infrastructure fixes
+
+Pachi 12.00:
+- dcnn support
+- better performance on windows
+- default settings changed, see readme
+- x64 build
+

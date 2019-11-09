@@ -1,0 +1,100 @@
+Docs:
+* Manual page - full usage documentation
+* GTP interface documentation
+
+
+Strength:
+* GPU mode
+        Use dcnn for all nodes in the tree instead of just the root node.
+        This should improve tree search quite a bit (1-2 stones stronger
+        maybe). Try progressive widening, value networks.
+* Scalability
+        On same machine cpu-only Hira (36I) scales better:
+           6000 playouts -> 2d      15000 playouts -> 3d
+        With 15000 playouts Pachi is 2d but increasing further doesn't
+        help. Find what can be improved (it's not just playouts).
+* Learned playout policy
+        Moggy playouts are fast but noisy and not always balanced.
+        There are some blind spots also. A good learnt, balanced policy
+        would make quite a difference. See darkforest playouts for
+        example (very slow though)
+* LFR large patterns (CPU mode)
+        Use LFR for priors instead of MM patterns.
+        MM patterns have about 37% prediction rate right now, can expect
+        44% with LFR which should help tree search quite a bit.
+        Implementation doesn't even need to be fast (incremental patterns)
+        to be used in tree search. Try progressive widening.
+* Joseki
+        make joseki engine work with dcnn ? not very high prio since dcnn
+        is decent at joseki, but would be useful to patch holes (some
+        players use the same hamete over and over).
+        right now joseki is turned off when playing with dcnn. Joseki priors are
+        tuned against patterns priors, would need some tweaking.
+
+
+Base:
+* Further optimize board implementation, profiling fun
+* Allow custom GTP commands for modules
+* Fix the build system to allow fully parallel build
+	However, revamp to something like cmake (or, ugh, autotools)
+	is not guaranteed to be appreciated.
+
+
+Self-contained tasks:
+* Improving Pachi's game analysis features
+	We provide just a few user-unfriendly proof-of-concept scripts
+	but it should be fairly easy to upgrade them to something
+	that creates a nice webpage with move-by-move statistics,
+	winrate evolution, pattern moves andwhatnot. CrazyStone stats
+	output may be used for inspiration, but we can take it further!
+	This could be done even if you are afraid of Pachi's codebase,
+	just using Pachi's output.
+* Try to avoid using a hash table for 3x3 patterns
+	Instead autogenerate procedural matching code; may be more
+	efficient (the near-guaranteed L1 cache miss is fairly expensive).
+        Experimented with this but no luck so far, with a few optimizations
+        procedural code comes pretty close but still slower than hash table.
+* Optimizing our tree implementation for cache-efficiency
+	Statistics of all children of a parent node shall be contained
+	in an array of the parent node so that move evaluation during
+	the descent can access them sequentially in memory, instead
+	of walking a linked list. Pasky already tried once but it's
+	somewhat arduous and dull work.
+* Clean up the is_private() hack in the distributed engine
+	We should simply check against a proper IP range ACL specified
+	as a parameter instead.
+
+
+General improvements:
+* Online Pachi game analysis/dump features
+	Make Pachi generate a webpage with *lots* of details after each
+	move while playing a game. This can provide game analysis info
+	for observer or casual opponent, but could also help with
+	debugging when just dumping stuff on stderr is intractable.
+* Automated building of opening book
+* Expanding and tagging the regression suite
+	Even better, create a nice UI for our users to contribute and
+	crowdsource!
+	What about drawing testcases from GNUGo's regression suite?
+* Implement Pachi support to fishtest
+	http://tests.stockfishchess.org/tests would allow crowdsourcing
+	Pachi parameter tuning.
+* Split playout aspects to custom-stackable pieces?
+* Port to Intel Phi (if we get the hardware :)
+
+
+Some heuristics to test:
+* Try to adapt and reuse GNUGo's pattern matching code/database
+* Local trees (work in progress, no luck so far)
+* Liberty maps (work in progress)
+* Implement a tsumego solver and apply it once per playout (stv insp.,
+  see Eric van der Werf's PhD thesis?)
+* Balanced local-based patterns?
+* Killer moves (redundant to RAVE?)
+* Reverse status learning
+	Run on game corpus. Start at final position, watch development
+	of status of all stones. The moment the final status and expected
+	status changes, analyze, especially if move choice differs. Use
+	learnt status-fixing moves in simulations somehow.
+	Tried to do this on Pachi-played KGS games; no measurable effect
+	(maybe too small sample).

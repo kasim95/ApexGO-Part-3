@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<style>
+  body {transition: opacity ease-in 0.2s; } 
+  body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relative; } 
+</style>
+    
+
+  <link  href="./html/frameworks.css"  media="all" rel="stylesheet">
+  <link  href="./html/github.css"  media="all" rel="stylesheet">
+
+  <meta name="viewport" content="width=device-width">
+  
+  <title>pasky/pachi: A fairly strong Go/Baduk/Weiqi playing program</title>
+  <link rel="search" type="application/opensearchdescription+xml" href="https://github.com/opensearch.xml" title="GitHub">
+  <link rel="fluid-icon" href="https://github.com/fluidicon.png" title="GitHub">
+  <meta property="fb:app_id" content="1401488693436528">
+
+    
+      <link href="https://github.com/pasky/pachi/commits/master.atom" rel="alternate" title="Recent Commits to pachi:master" type="application/atom+xml">
+
+  <meta name="description" content="pachi - A fairly strong Go/Baduk/Weiqi playing program">
+  <meta name="go-import" content="github.com/pasky/pachi git https://github.com/pasky/pachi.git">
+
+    <link rel="canonical" href="https://github.com/pasky/pachi" data-pjax-transient="">
+
+  <meta name="theme-color" content="#1e2327">
+  <meta name="u2f-support" content="true">
+</head>
+
+
+
+<body class="logged-in env-production intent-mouse">
+
+  <div id="start-of-content" class="show-on-focus"></div>
+
+  <div role="main">
+        <div itemscope="" itemtype="http://schema.org/SoftwareSourceCode" class="">
+    <div id="js-repo-pjax-container" data-pjax-container="">
+  
+
+<div class="container new-discussion-timeline experiment-repo-nav ">
+  <div class="repository-content ">
+
+    
+  
+
+  <div id="readme" class="readme boxed-group clearfix announce instapaper_body md">
+    
+
+<article class="markdown-body entry-content" itemprop="text">
+
+<p><a href="https://github.com/pasky/pachi/blob/master/media/pachi-med.jpg"
+      target="_blank"><img align="right" src="./html/pachi-med.jpg" style="max-width:100%;"></a></p>
+
+<h1>Pachi</h1>
+
+<p>Pachi can refer to: a simple modular framework for programs playing
+the game of Go/Weiqi/Baduk, and a reasonably strong engine built
+within this framework.</p>
+
+<h2>Engine</h2>
+
+<p>The default engine plays by Chinese rules and should be about 7d KGS
+strength on 9x9. On 19x19 it can hold a solid KGS 2d rank on modest
+hardware (Raspberry Pi 3, dcnn) or faster machine (e.g. six-way Intel
+i7) without dcnn.</p>
+
+<p>When using a large cluster (64 machines, 20 cores each), it maintains
+KGS 3d to 4d and has won e.g. a 7-stone handicap game against Zhou Junxun 9p.</p>
+<p>By default, Pachi currently uses the UCT engine that combines
+Monte Carlo approach with tree search; UCB1AMAF tree policy using
+the RAVE method is used for tree search, while the Moggy playout
+policy using 3x3 patterns and various tactical checks is used for
+the semi-random Monte Carlo playouts.  MM patterns are used in the
+tree search.</p>
+
+<h2>Installation</h2>
+
+<p><a href="https://github.com/pasky/pachi/blob/master/media/screenshot_sabaki.jpg"
+      target="_blank"><img align="right" src="./html/screenshot_sabaki.jpg"
+      title="playing through sabaki" style="max-width:100%;"></a></p>
+
+<p>To install Pachi simply unzip the binary release somewhere.</p>
+
+<p><code>pachi.exe</code> is a GTP client. Connect to it
+to your favorite Go interface  (e.g. 
+  <a href="https://sourceforge.net/projects/gogui/" rel="nofollow">gogui</a>, 
+  <a href="http://sabaki.yichuanshen.de/" rel="nofollow">sabaki</a>, 
+  <a href="https://github.com/featurecat/lizzie" rel="nofollow">lizzie</a> ...),
+or use <a href="http://www.michna.com/kgsbot.htm" rel="nofollow">kgsgtp</a> to connect it to KGS.</p>
+
+<blockquote>
+<p>DO NOT make the GTP interface accessible directly to untrusted users
+since the parser is not secure - see the 
+<a href="https://github.com/pasky/pachi/blob/master/HACKING?raw=true">HACKING</a>
+file for details.</p>
+</blockquote>
+
+<p>
+The pachi program can take many parameters. The defaults should be fine for initial usage,
+see below for some tips.</p>
+
+<h2>Deep Learning</h2>
+
+<p>Pachi uses a neural network as source of good moves to consider.
+With dcnn support Pachi can play at dan level strength on modest hardware.
+For large number of playouts this makes it about 1 stone stronger, and
+tends to make the games more pretty. A raw dcnn engine is available for
+pure dcnn play (not recommended for actual games, pachi won't know when to
+pass or resign !).</p>
+
+<p><code>pachi --list-dcnn</code>    List supported networks.  <br>
+   <code>pachi --dcnn=name</code>    Choose network to use (Detlef's 54% dcnn by default).</p>
+
+<p>Releases come with Detlef's 54% dcnn by default.<br>
+For other networks see <a href="https://github.com/pasky/pachi/releases/tag/pachi_networks">Pachi Networks</a>.</p>
+
+<p>Currently dcnn is used for root node only.</p>
+
+
+<h2>How to run</h2>
+
+<p>By default Pachi will run on all cores, using up to 300Mb (win64: 600Mb)
+of memory for tree search and taking a little under 10 seconds per move.
+You can adjust these parameters by passing it extra command line options.</p>
+
+<p>For main options description try:</p>
+<pre><code>    pachi.exe --help
+</code></pre>
+
+<p><strong>Time Settings</strong></p>
+
+<p>Pachi can smartly deal with a variety of time settings (canadian byoyomi
+recommended to maximize efficient time allocation). However, most of these
+are accessible only via GTP, that is by the frontend keeping track of time,
+e.g. KGS or gogui.</p>
+
+<p>It's also possible to force time settings via the
+command line (GTP time settings are ignored then):</p>
+
+<ul>
+<li><code>pachi.exe -t 20        </code>     20s per move.</li>
+<li><code>pachi.exe -t _600       </code>     10 minutes sudden death.</li>
+<li><code>pachi.exe -t =5000       </code>     5000 playouts per move.</li>
+<li><code>pachi.exe -t =5000:15000   </code>      Think more when needed. Same but up-to 15000 playouts if best move is unclear.</li>
+<li><code>pachi.exe -t =5000:15000 --fuseki-time =4000</code>     Don't think too much during fuseki.</li>
+</ul>
+
+<p><strong>Fixed Strength</strong></p>
+
+<p>Pachi will play fast on a fast computer, slow on a slow computer, but strength
+will remain the same:</p>
+
+<ul>
+<li><code>pachi.exe -t =5000:15000 --dcnn=df    </code>    kgs 3d.</li>
+<li><code>pachi.exe -t =5000:15000    </code>    kgs 2d.</li>
+<li><code>pachi.exe --nodcnn -t =5000   </code>   kgs 3k (mcts only).</li>
+</ul>
+
+<p><strong>Other Options</strong></p>
+
+<ul>
+<li><code>pachi.exe resign_threshold=0.25</code>     Resign when winrate < 25% (default: 10%).</li>
+
+<li><code>pachi.exe -t =5000:15000 threads=4,max_tree_size=100</code>
+<p>This will make Pachi play with max 15000 playouts per move on 4 threads,
+taking up to 100Mb of memory (+ several tens MiB as a constant overhead).
+It should be about 2d with dcnn and large patterns setup (default).</p></li>
+
+<li><code>pachi.exe -t _1200 --no-dcnn threads=8,max_tree_size=3072,pondering</code>
+<p>This will make Pachi play without dcnn with time settings 20:00 S.D. with 8 threads,
+taking up to 3GiB of memory, and thinking during the opponent's turn as well.</p></li>
+</ul>
+
+<p><strong>Logs</strong></p>
+
+<p>Pachi logs details of its activity on stderr, which can be viewed via <code>Tools->GTP Shell</code>
+in gogui. Tons of details about winrates, memory usage, score estimate etc can be found here. 
+Even though most of it available through other means in gogui, it's always a good place to look in case
+something unexpected happens.</p>
+
+<p>
+<code>-d &lt;log_level&gt;</code> changes the amount of logging  (-d0 suppresses everything)<br>
+<code>-o log_file</code> log to a file instead. gogui live-gfx commands won't work though.
+</p>
+
+
+<p><strong>Batch File</strong></p>
+
+<p><code>pachi.bat</code> can be used to keep options in one place.</p>
+
+<p>Tip: If your Go Program doesn't let you run .bat files directly give it <code>cmd.exe</code> instead:</p>
+<p><code>C:\Windows\System32\cmd.exe /c C:\path\to\pachi.bat</code></p>
+
+
+<h2>Analyze commands</h2>
+
+<p>When running Pachi through GoGui, a number of graphic tools are available
+through the <code>Tools-&gt;Analyze commands</code> window:</p>
+<ul>
+  <li>Best moves</li>
+  <li>Score estimate</li>
+  <li>DCNN ratings ...</li>
+</ul>
+
+<p>It's also possible to visualize best moves / best sequence while Pachi is thinking
+via the live gfx commands.</p>
+
+<p>
+  <a href="https://github.com/pasky/pachi/blob/master/media/screenshot_score_est.png?raw=true"
+     target="_blank"><img src="./html/screenshot_score_est.png" alt="score estimate"
+     title="score estimate" style="max-width:100%;"></a>
+  <a href="https://github.com/pasky/pachi/blob/master/media/screenshot_dcnn_colors.png?raw=true"
+     target="_blank"><img src="./html/screenshot_dcnn_colors.png" alt="dcnn colormap"
+     title="dcnn colormap" style="max-width:100%;"></a>
+</p>
+
+<p>There are some <a href="https://github.com/pasky/pachi#game-analysis">non-gui tools</a>
+for game analysis as well in the repository.</p>
+
+
+<h2>Lizzie</h2>
+
+<a href="html/screenshot_lizzie_big.jpg">
+   <img align="right" src="html/screenshot_lizzie.jpg" title="pachi in lizzie v0.6 !" /> </a>
+
+<p>It's also possible to run Pachi with <a href="https://github.com/featurecat/lizzie">Lizzie</a> to analyze things !  
+This is a great way to explore variations, analyze games or visualize what Pachi is doing while it's thinking,
+the graphics are amazing.</p>
+
+<p>To make Lizzie use Pachi instead of Leela-Zero edit Lizzie config.txt:</p>
+
+<p><code>    "engine-command": "/path/to/pachi --version=0.16",</code></p>
+
+<p>Or see <a href="https://github.com/pasky/pachi#Lizzie">homepage</a> to
+download Lizzie+Pachi binary release.</p>
+
+
+<h2>More</h2>
+
+<p>See <a href="https://github.com/pasky/pachi">homepage</a> for more info.</p>
+
+<p>Also, if you are interested in Pachi's architecture, algorithms
+etc., consider taking a look at Petr Baudis' Master's Thesis:</p>
+<p><a href="http://pasky.or.cz/go/prace.pdf" rel="nofollow">http://pasky.or.cz/go/prace.pdf</a></p>
+
+<p>...or a slightly newer scientific paper on Pachi:</p>
+<p><a href="http://pasky.or.cz/go/pachi-tr.pdf" rel="nofollow">http://pasky.or.cz/go/pachi-tr.pdf</a></p>
+
+
+<h2>Licence</h2>
+
+<p>Pachi is distributed under the GPLv2 licence (see the
+<a href="https://github.com/pasky/pachi/blob/master/COPYING?raw=true">COPYING</a>
+file for details and full text of the licence); you are welcome to tweak
+it as you wish (contributing back upstream is welcome) and distribute
+it freely, but only together with the source code. You are welcome
+to make private modifications to the code (e.g. try new algorithms and
+approaches), use them internally or even to have your bot play on the
+internet and enter competitions, but as soon as you want to release it
+to the public, you need to release the source code as well.</p>
+<p>One exception is the Autotest framework, which is licenced under the
+terms of the MIT licence (close to public domain) - you are free to
+use it any way you wish.</p>
+
+
+</article>
+  </div>
+  </div>
+</div>
+    </div>
+  </div>
+  </div>
+
+</body>
+</html>

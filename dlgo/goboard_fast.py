@@ -2,7 +2,7 @@ import copy
 from dlgo.gotypes import Player, Point
 from dlgo.scoring import compute_game_result
 from dlgo import zobrist
-from utils import MoveAge
+from .utils import MoveAge
 
 neighbor_tables = {}
 corner_tables = {}

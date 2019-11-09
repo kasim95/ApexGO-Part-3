@@ -6,8 +6,8 @@ from flask import request
 
 from dlgo import agent
 from dlgo import goboard_fast as goboard
-from utils import coords_from_point
-from utils import point_from_coords
+from ..utils import coords_from_point
+from ..utils import point_from_coords
 
 __all__ = [
     'get_web_app',

@@ -8,9 +8,9 @@ from dlgo.agent.termination import PassWhenOpponentPasses, TerminationAgent
 from dlgo.goboard_fast import GameState, Move
 from dlgo.gotypes import Player
 from dlgo.gtp.board import gtp_position_to_coords, coords_to_gtp_position
-from dlgo.gtp.utils import SGFWriter
-from utils import print_board
+from dlgo.gtp.gtp_utils import SGFWriter
 from dlgo.scoring import compute_game_result
+from dlgo.utils import print_board
 
 
 class LocalGtpBot:
@@ -25,7 +25,7 @@ class LocalGtpBot:
         cmd = self.opponent_cmd(opponent)
         pipe = subprocess.PIPE
 
-        self.gtp_stream = subprocess.Popen(cmd, stdin=pipe, stdout=pipe)
+        self.gtp_stream = subprocess.Popen(cmd, stdin=pipe, stdout=pipe, bufsize=1, universal_newlines=True)
 
         # state
         self._stopped = False
@@ -33,26 +33,26 @@ class LocalGtpBot:
     @staticmethod
     def opponent_cmd(opponent):
         if opponent == 'gnugo':
-            return ['gnugo', '--mode', 'gtp']
+            return ['./../../opponent_engines/gnugo-3.8/gnugo', '--mode', 'gtp']
         elif opponent == 'pachi':
-            return ['pachi']
+            return ['../../opponent_engines/Pachi/pachi']
         else:
             raise ValueError(f'Unknown bot name \'{opponent}\'')
 
     def send_command(self, cmd):
-        self.gtp_stream.stdin.write(cmd.encode('utf-8'))
+        self.gtp_stream.stdin.write(cmd)
 
     def get_response(self):
         succeeded = False
         result = ''
 
         while not succeeded:
-            line = self.gtp_stream.stdout.readline()
-
-            if line[0] == '=':
-                succeeded = True
-                line = line.strip()
-                result = re.sub('^= ?', '', line)
+            for line in iter(self.gtp_stream.stdout.readline, ""):
+                if line[0] == '=':
+                    succeeded = True
+                    line = line.strip()
+                    result = re.sub('^= ?', '', line)
+                    break
 
         return result
 
@@ -138,10 +138,15 @@ class LocalGtpBot:
 
 
 if __name__ == "__main__":
+    import sys
+
+    sys.path.append('../../')
+
     # betago.hdf5 is referenced by book, but no betago bot at this point
     # todo: implement betago bot?
     # bot = load_prediction_agent(h5py.File('../../agents/betago.hdf5', 'r'))
     bot = load_prediction_agent(h5py.File('../../agents/deep_bot.h5', 'r'))
 
-    gnu_go = LocalGtpBot(go_bot=bot, termination=PassWhenOpponentPasses(), handicap=0, opponent='pachi')
+    #gnu_go = LocalGtpBot(go_bot=bot, termination=PassWhenOpponentPasses(), handicap=0, opponent='pachi')
+    gnu_go = LocalGtpBot(go_bot=bot, termination=PassWhenOpponentPasses(), handicap=0, opponent='gnugo')
     gnu_go.run()
