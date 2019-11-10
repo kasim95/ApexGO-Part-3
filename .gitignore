@@ -130,3 +130,6 @@ dmypy.json
 /agents/deep_bot.h5
 /test_samples.py
 /dlgo/gtp/out.sgf
+/agents/*
+kgs_index.html
+
