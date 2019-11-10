@@ -1,3 +1,5 @@
+# python self_play_ac.py --board-size 19 --learning-agent agents/ac/ac_v1.hdf5 --num-games 5000 --experience-out agents/ac/exp_ac_v1.hdf5
+
 import argparse
 # import datetime
 from collections import namedtuple

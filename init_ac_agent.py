@@ -1,3 +1,5 @@
+# python init_ac_agent.py --board-size 19 agents/ac/ac_v1.hdf5
+
 import argparse
 import h5py
 
@@ -6,6 +8,7 @@ from keras.layers import Conv2D, Dense, Flatten, Input
 import dlgo.networks
 from dlgo import encoders
 from dlgo import rl
+
 
 # 12.5
 def main():
