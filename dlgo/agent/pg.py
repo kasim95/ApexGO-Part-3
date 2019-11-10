@@ -1,5 +1,5 @@
 import numpy as np
-# from keras import backend as K
+from keras import backend as K
 from keras.optimizers import SGD
 
 from dlgo.agent.base import Agent
@@ -11,7 +11,21 @@ from dlgo import kerasutil
 __all__ = [
     'PolicyAgent',
     'load_policy_agent',
+    'policy_gradient_loss',
 ]
+
+
+# Keeping this around so we can read existing agents. But from now on
+# we'll use the built-in crossentropy loss.
+def policy_gradient_loss(y_true, y_pred):
+    clip_pred = K.clip(y_pred, K.epsilon(), 1 - K.epsilon())
+    loss = -1 * y_true * K.log(clip_pred)
+    return K.mean(K.sum(loss, axis=1))
+
+
+def normalize(x):
+    total = np.sum(x)
+    return x / total
 
 
 # 9.7
@@ -21,6 +35,15 @@ class PolicyAgent(Agent):
         self._model = model      # A Keras Sequential model instance
         self._encoder = encoder  # Implements the Encoder interface
         self._collector = None
+        self._temperature = 0.0
+
+    def predict(self, game_state):
+        encoded_state = self._encoder.encode(game_state)
+        input_tensor = np.array([encoded_state])
+        return self._model.predict(input_tensor)[0]
+
+    def set_temperature(self, temperature):
+        self._temperature = temperature
 
     def set_collector(self, collector):  # 9.17
         self._collector = collector      # Allows the self-play driver program to attach a collector to the agent
@@ -28,16 +51,27 @@ class PolicyAgent(Agent):
     def select_move(self, game_state):  # 9.12 and 9.17
         board_tensor = self._encoder.encode(game_state)
         x = np.array([board_tensor])            # The Keras Predict call makes batch predictions,
-        move_probs = self._model(x)[0]           # so you wrap your single board in an array and
+        num_moves = self._encoder.board_width * self._encoder.board_height
+
+        # move_probs = self._model.predict(x)[0]           # so you wrap your single board in an array and
+
+        if np.random.random() < self._temperature:
+            # Explore random moves.
+            move_probs = np.ones(num_moves) / num_moves
+        else:
+            # Follow our current policy.
+            move_probs = self._model.predict(x)[0]
+
         # move_probs = clip_probs(move_probs)     # pull out the first item the resulting array
         eps = 1e-5
         move_probs = np.clip(move_probs, eps, 1 - eps)
+        move_probs = move_probs / np.sum(move_probs)
 
-        num_moves = self._encoder.board_width * self._encoder.board_height
+        # move_probs = move_probs.astype(dtype=np.float64)
         candidates = np.arange(num_moves)  # Creates an array containing the index of every point on the board
 
-        ranked_moves = np.random.choice(    # Samples from the points on the board according to the policy,
-            candidates, num_moves, replace=False, p=move_probs)     # creates a ranked list of points to try
+        # Samples from the points on the board according to the policy, creates a ranked list of points to try
+        ranked_moves = np.random.choice(candidates, num_moves, replace=False, p=move_probs)
 
         for point_idx in ranked_moves:  # Loops over each point, checks if it's valid, and picks the first valid one
             point = self._encoder.decode_point_index(point_idx)
@@ -73,7 +107,7 @@ class PolicyAgent(Agent):
             target_vectors[i][action] = reward
         return target_vectors
 
-    def train(self, experience, lr, clipnorm, batch_size):  # 10.6
+    def train(self, experience, lr=0.0000001, clipnorm=1.0, batch_size=512):  # 10.6
         self._model.compile(
             loss='categorical_crossentropy',    # The compile method assigns an optimizer to the model;
             optimizer=SGD(lr=lr, clipnorm=clipnorm))    # in this case, the SGD (stochastic gradient descent)
