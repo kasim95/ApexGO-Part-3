@@ -8,7 +8,7 @@ import h5py
 
 ROWS, COLS = 19, 19
 NUM_CLASSES = ROWS * COLS
-NUM_GAMES = 5
+NUM_GAMES = 1000
 
 
 def main():
