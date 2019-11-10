@@ -37,7 +37,7 @@ FEATURE_OFFSETS = {
 
 
 def offset(feature):
-    return FEATURE_OFFSETS[feature]
+    return int(FEATURE_OFFSETS[feature])
 
 
 # 13.1.2
@@ -70,19 +70,19 @@ class AlphaGoEncoder(Encoder):
                 if not is_point_an_eye(game_state.board, point, game_state.next_player):
                     board_tensor[offset("sensibleness")][r][c] = 1
 
-                ages = min(game_state.board.move_ages.get(r, c), 8)
+                ages = int(min(game_state.board.move_ages.get(r, c), 8))
                 if ages > 0:
                     print(ages)
                     board_tensor[offset("turns_since") + ages][r][c] = 1
 
                 if game_state.board.get_go_string(point):
-                    liberties = min(game_state.board.get_go_string(point).num_liberties, 8)
+                    liberties = int(min(game_state.board.get_go_string(point).num_liberties, 8))
                     board_tensor[offset("liberties") + liberties][r][c] = 1
 
                 move = Move(point)
                 if game_state.is_valid_move(move):
                     new_state = game_state.apply_move(move)
-                    liberties = min(new_state.board.get_go_string(point).num_liberties, 8)
+                    liberties = int(min(new_state.board.get_go_string(point).num_liberties, 8))
                     board_tensor[offset("liberties_after") + liberties][r][c] = 1
 
                     adjacent_strings = [game_state.board.get_go_string(nb)
@@ -92,13 +92,13 @@ class AlphaGoEncoder(Encoder):
                         other_player = game_state.next_player.other
                         if go_string and go_string.num_liberties == 1 and go_string.color == other_player:
                             capture_count += len(go_string.stones)
-                    capture_count = min(capture_count, 8)
+                    capture_count = int(min(capture_count, 8))
                     board_tensor[offset("capture_size") + capture_count][r][c] = 1
 
                 if go_string and go_string.num_liberties == 1:
                     go_string = game_state.board.get_go_string(point)
                     if go_string:
-                        num_atari_stones = min(len(go_string.stones), 8)
+                        num_atari_stones = int(min(len(go_string.stones), 8))
                         board_tensor[offset("self_atari_size") + num_atari_stones][r][c] = 1
 
                 if is_ladder_capture(game_state, point):

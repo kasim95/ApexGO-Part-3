@@ -288,8 +288,10 @@ class GameState:
             self.previous_states = frozenset(
                 previous.previous_states |
                 {(previous.next_player, previous.board.zobrist_hash())})
-
-        self.last_move = move
+        if type(move) == tuple:
+            self.last_move = Move(move)
+        else:
+            self.last_move = move
 
     def apply_move(self, move):
         if move.is_play:
@@ -309,8 +311,11 @@ class GameState:
         return GameState(board, Player.black, None, None)
 
     def is_over(self):
-        if self.last_move is None:
+        if self.last_move is None or self.previous_state is None:
             return False
+
+        if type(self.last_move) == tuple:
+            self.last_move = Move(self.last_move)
 
         if self.last_move.is_resign:
             return True
