@@ -130,6 +130,13 @@ dmypy.json
 /agents/deep_bot.h5
 /test_samples.py
 /dlgo/gtp/out.sgf
+
+# ignored agents for now 
+# remove after agent is finalized
 /agents/*
+
 kgs_index.html
+/alphago/data
+/alphago/kgs_index.html
+/alphago/test_samples.py
 
