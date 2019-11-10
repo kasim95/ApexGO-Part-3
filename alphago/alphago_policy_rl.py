@@ -15,7 +15,7 @@ alphago_rl_agent = PolicyAgent(sl_agent.model, encoder)
 opponent = PolicyAgent(sl_opponent.model, encoder)
 
 # simulation
-num_games = 1000
+num_games = 10
 experience = experience_simulation(num_games, alphago_rl_agent, opponent)
 
 alphago_rl_agent.train(experience)
