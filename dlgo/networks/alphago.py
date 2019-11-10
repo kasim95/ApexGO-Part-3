@@ -3,6 +3,7 @@ from keras.layers.core import Dense, Flatten
 from keras.layers.convolutional import Conv2D
 
 
+# 13.1.1
 def alphago_model(input_shape,
                   is_policy_net=False,
                   num_filters=192,
