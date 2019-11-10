@@ -127,5 +127,7 @@ def load_policy_agent(h5file):
     encoder_name = h5file['encoder'].attrs['name']      # Recovers the board encoder
     board_width = h5file['encoder'].attrs['board_width']
     board_height = h5file['encoder'].attrs['board_height']
+    if type(encoder_name) == bytes:
+        encoder_name = encoder_name.decode()
     encoder = encoders.get_encoder_by_name(encoder_name, (board_width, board_height))
     return PolicyAgent(model, encoder)      # Reconstructs the agent
