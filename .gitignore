@@ -140,3 +140,9 @@ kgs_index.html
 /alphago/kgs_index.html
 /alphago/test_samples.py
 
+/alphago/data_1k_e200
+/alphago/alphago_rl_experience.h5
+/alphago/alphago_rl_policy.h5
+/alphago/alphago_sl_policy_e13_1k.h5
+/alphago/alphago_sl_policy_e13_1kgames.h5
+/alphago/alphago_value.h5
