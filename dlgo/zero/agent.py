@@ -1,3 +1,8 @@
+import numpy as np
+from keras.optimizers import SGD
+from dlgo.agent import Agent
+
+
 class Branch:
     def __init__(self, prior):
         self.prior = prior
@@ -50,3 +55,97 @@ class ZeroTreeNode:
             return self.branches[move].visit_count
 
         return 0
+
+
+class ZeroAgent(Agent):
+    def __init__(self, model, encoder, rounds_per_move=1600, c=2.0):
+        super().__init__()
+
+        self.model = model
+        self.encoder = encoder
+        self.num_rounds = rounds_per_move
+        self.c = c
+
+        self.collector = None
+
+    def select_move(self, game_state):
+        root = self.create_node(game_state)
+
+        for i in range(self.num_rounds):
+            node = root
+            next_move = self.select_branch(node)
+
+            while node.has_child(next_move):
+                node = node.get_child(next_move)
+                next_move = self.select_branch(node)
+
+            new_state = node.state.apply_move(next_move)
+            child_node = self.create_node(new_state, move=next_move, parent=node)
+
+            move = next_move
+            value = -1 * child_node.value
+
+            while node is not None:
+                node.record_visit(move, value)
+                move = node.last_move
+                node = node.parent
+                value = -1 * value
+
+        if self.collector is not None:
+            root_state_tensor = self.encoder.encode(game_state)
+
+            visit_counts = np.array([
+                root.visit_count(self.encoder.decode_move_index(idx)) for idx in range(self.encoder.num_moves())
+            ])
+
+            self.collector.record_decision(root_state_tensor, visit_counts)
+
+        return max(root.moves(), key=root.visit_count)
+
+    def set_collector(self, collector):
+        self.collector = collector
+
+    def create_node(self, game_state, move=None, parent=None):
+        state_tensor = self.encoder.encode(game_state)
+        model_input = np.array([state_tensor])
+        priors, values = self.model.predict(model_input)
+
+        priors = priors[0]
+        value = values[0][0]
+
+        move_priors = {
+            self.encoder.decode_move_index(idx): p for idx, p in enumerate(priors)
+        }
+
+        new_node = ZeroTreeNode(game_state, value, move_priors, parent, move)
+
+        if parent is not None:
+            parent.add_child(move, new_node)
+
+        return new_node
+
+    def select_branch(self, node):
+        total_n = node.total_visit_count
+
+        # see 14.2.1 for explanation
+        def score_branch(move):
+            q = node.expected_value(move)
+            p = node.prior(move)
+            n = node.visit_count(move)
+
+            return q + self.c * p * np.sqrt(total_n) / (n + 1)
+
+        return max(node.moves, key=score_branch)
+
+    def train(self, experience, learning_rate, batch_size):
+        num_examples = experience.states.shape[0]
+        model_input = experience.states
+
+        visit_sums = np.sum(experience.visit_counts, axis=1).reshape((num_examples, 1))
+
+        action_target = experience.visit_counts / visit_sums
+        value_target = experience.rewards
+
+        self.model.compile(SGD(lr=learning_rate), loss=['categorical_crossentropy', 'mse'])
+
+        self.model.fit(model_input, [action_target, value_target], batch_size=batch_size)
