@@ -117,15 +117,29 @@ class GoDataProcessor:
 
         chunk = 0  # Due to files with large content, split up after chunksize
         chunksize = 1024
-        # Process features and labels in chunks of 1024
-        while features.shape[0] >= chunksize:
+
+        # author's code which doesn't do what he thinks it does
+        # # Process features and labels in chunks of 1024
+        # while features.shape[0] >= chunksize:
+        #     feature_file = feature_file_base % chunk
+        #     label_file = label_file_base % chunk
+        #     chunk += 1
+        #     # break up chunk into another piece
+        #     current_features, features = features[:chunksize], features[chunksize:]
+        #     current_labels, labels = labels[:chunksize], labels[chunksize:]
+        #     # store into a separate file
+        #     np.save(feature_file, current_features)
+        #     np.save(label_file, current_labels)
+
+        # fixed code:
+        while features.shape[0] > 0:
             feature_file = feature_file_base % chunk
             label_file = label_file_base % chunk
             chunk += 1
-            # break up chunk into another piece
+
             current_features, features = features[:chunksize], features[chunksize:]
             current_labels, labels = labels[:chunksize], labels[chunksize:]
-            # store into a separate file
+
             np.save(feature_file, current_features)
             np.save(label_file, current_labels)
 
@@ -178,6 +192,7 @@ class GoDataProcessor:
         for file_name in file_names:
             file_prefix = file_name.replace('.tar.gz', '')
             base = self.data_dir + '/' + file_prefix + '_features_*.npy'
+
             for feature_file in glob.glob(base):
                 label_file = feature_file.replace('features', 'labels')
                 x = np.load(feature_file)

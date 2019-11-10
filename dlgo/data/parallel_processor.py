@@ -61,6 +61,11 @@ class GoDataProcessor:
         return tar_file
 
     def process_zip(self, zip_file_name, data_file_name, game_list):
+        feature_file_base = self.data_dir + '/' + data_file_name + '_features_%d'
+        label_file_base = self.data_dir + '/' + data_file_name + '_labels_%d'
+
+        print(f"processing {data_file_name}...")
+
         tar_file = self.unzip_data(zip_file_name)
         zip_file = tarfile.open(self.data_dir + '/' + tar_file)
         name_list = zip_file.getnames()
@@ -98,19 +103,39 @@ class GoDataProcessor:
                     game_state = game_state.apply_move(move)
                     first_move_done = True
 
-        feature_file_base = self.data_dir + '/' + data_file_name + '_features_%d'
-        label_file_base = self.data_dir + '/' + data_file_name + '_labels_%d'
-
         chunk = 0
         chunksize = 1024
-        while features.shape[0] >= chunksize:
+
+        # Does not do what author thinks it does -- truncates data
+        # while features.shape[0] >= chunksize:
+        #     feature_file = feature_file_base % chunk
+        #     label_file = label_file_base % chunk
+        #     chunk += 1
+        #     current_features, features = features[:chunksize], features[chunksize:]
+        #     current_labels, labels = labels[:chunksize], labels[chunksize:]
+        #     np.save(feature_file, current_features)
+        #     np.save(label_file, current_labels)
+
+        # fixed code:
+        while features.shape[0] > 0:
             feature_file = feature_file_base % chunk
             label_file = label_file_base % chunk
             chunk += 1
+
             current_features, features = features[:chunksize], features[chunksize:]
             current_labels, labels = labels[:chunksize], labels[chunksize:]
+
             np.save(feature_file, current_features)
+            print(f'wrote {feature_file}')
+
             np.save(label_file, current_labels)
+            print(f'wrote {label_file}')
+
+        # allow garbage collection
+        features = None
+        labels = None
+        current_features = None
+        current_labels = None
 
     def consolidate_games(self, name, samples):
         files_needed = set(file_name for file_name, index in samples)

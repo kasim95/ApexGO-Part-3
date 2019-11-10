@@ -1,4 +1,4 @@
-from dlgo.data.data_processor import GoDataProcessor
+from dlgo.data.parallel_processor import GoDataProcessor
 from dlgo.encoders.alphago import AlphaGoEncoder
 from dlgo.agent.predict import DeepLearningAgent
 from dlgo.networks.alphago import alphago_model
@@ -8,7 +8,7 @@ import h5py
 
 ROWS, COLS = 19, 19
 NUM_CLASSES = ROWS * COLS
-NUM_GAMES = 5
+NUM_GAMES = 100
 
 
 def main():
@@ -17,14 +17,14 @@ def main():
     processor = GoDataProcessor(encoder=encoder.name())
 
     # Paraller Processor
-    # generator = processor.load_go_data('train', NUM_GAMES, use_generator=True)
-    # test_generator = processor.load_go_data('test', NUM_GAMES, use_generator=True)
-    #
+    generator = processor.load_go_data('train', NUM_GAMES, use_generator=True)
+    test_generator = processor.load_go_data('test', NUM_GAMES, use_generator=True)
+
 
     # Data Processor
-    generator = processor.load_go_data('train', NUM_GAMES)
-    test_generator = processor.load_go_data('test', NUM_GAMES)
-    #
+    # todo: does not have use_generator capability
+    # generator = processor.load_go_data('train', NUM_GAMES)
+    # test_generator = processor.load_go_data('test', NUM_GAMES)
 
     # sl model
     input_shape = (encoder.num_planes, ROWS, COLS)
@@ -34,7 +34,7 @@ def main():
                               metrics=['accuracy'])
 
     # sl train
-    epochs = 3
+    epochs = 200
     batch_size = 128
     alphago_sl_policy.fit_generator(
         generator=generator.generate(batch_size, NUM_CLASSES),
