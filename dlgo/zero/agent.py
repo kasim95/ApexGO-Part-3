@@ -135,7 +135,7 @@ class ZeroAgent(Agent):
 
             return q + self.c * p * np.sqrt(total_n) / (n + 1)
 
-        return max(node.moves, key=score_branch)
+        return max(node.moves(), key=score_branch)
 
     def train(self, experience, learning_rate, batch_size):
         num_examples = experience.states.shape[0]
