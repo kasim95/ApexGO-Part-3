@@ -2,37 +2,35 @@ from keras.layers import Conv2D, Flatten, Dense
 from keras.models import Model, Input
 
 import dlgo.zero as zero
-from dlgo import goboard_fast as goboard
+from dlgo.goboard_fast import GameState
 from dlgo.gotypes import Player
 from dlgo import scoring
-from dlgo.rl import GameRecord
 
 
-def simulate_game(board_size, black_player, black_collector, white_player, white_collector):
-    moves = []
-    game = goboard.GameState.new_game(board_size)
-
-    black_player.set_collector(black_collector)
-    white_player.set_collector(white_collector)
-
+def simulate_game(
+        board_size,
+        black_agent, black_collector,
+        white_agent, white_collector):
+    print('Starting the game!')
+    game = GameState.new_game(board_size)
     agents = {
-        Player.black: black_player,
-        Player.white: white_player,
+        Player.black: black_agent,
+        Player.white: white_agent,
     }
 
+    black_collector.begin_episode()
+    white_collector.begin_episode()
     while not game.is_over():
         next_move = agents[game.next_player].select_move(game)
-        moves.append(next_move)
         game = game.apply_move(next_move)
 
     game_result = scoring.compute_game_result(game)
-    print(game_result)
-
-    return GameRecord(
-        moves=moves,
-        winner=game_result.winner,
-        margin=game_result.winning_margin,
-    )
+    if game_result.winner == Player.black:
+        black_collector.complete_episode(1)
+        white_collector.complete_episode(-1)
+    else:
+        black_collector.complete_episode(-1)
+        white_collector.complete_episode(1)
 
 
 def run():
