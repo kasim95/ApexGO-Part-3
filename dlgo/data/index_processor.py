@@ -54,7 +54,8 @@ class KGSIndex:
             file_name = file_info['filename']
             if not os.path.isfile(self.data_directory + '/' + file_name):
                 urls_to_download.append((url, self.data_directory + '/' + file_name))
-        cores = multiprocessing.cpu_count()
+        # cores = multiprocessing.cpu_count()
+        cores = 1
         pool = multiprocessing.Pool(processes=cores)
         try:
             it = pool.imap(worker, urls_to_download)
@@ -103,5 +104,6 @@ class KGSIndex:
 
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     index = KGSIndex()
     index.download_files()

@@ -231,3 +231,7 @@ class GoDataProcessor:
             else:
                 raise ValueError(name + ' is not a valid sgf')
         return total_examples
+
+
+if __name__ == '__main__':
+    multiprocessing.freeze_support()
