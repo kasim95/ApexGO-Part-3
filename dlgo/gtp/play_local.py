@@ -37,7 +37,7 @@ class LocalGtpBot:
         elif opponent == 'pachi':
             return ['../../opponent_engines/Pachi/pachi']
         else:
-            raise ValueError(f'Unknown bot name \'{opponent}\'')
+            raise ValueError('Unknown bot name \'{}\''.format(opponent))
 
     def send_command(self, cmd):
         self.gtp_stream.stdin.write(cmd)
@@ -72,7 +72,7 @@ class LocalGtpBot:
             self.command_and_response('komi 7.5\n')
             self.sgf.append('KM[7.5]\n')
         else:
-            stones = self.command_and_response(f'fixed_handicap {self.handicap}\n')
+            stones = self.command_and_response('fixed_handicap {}\n'.format(self.handicap))
             sgf_handicap = "HA[{}]AB".format(self.handicap)
 
             for pos in stones.split(' '):
@@ -103,29 +103,29 @@ class LocalGtpBot:
         sgf_move = ''
 
         if move.is_pass:
-            self.command_and_response(f'play {our_name} pass\n')
+            self.command_and_response('play {} pass\n'.format(our_name))
         elif move.is_resign:
-            self.command_and_response(f'play {our_name} resign\n')
+            self.command_and_response('play {} resign\n'.format(our_name))
         else:
             pos = coords_to_gtp_position(move)
 
-            self.command_and_response(f'play {our_name} {pos}\n')
+            self.command_and_response('play {0} {1}\n'.format(our_name, pos))
             sgf_move = self.sgf.coordinates(move)
 
-        self.sgf.append(f';{our_letter}[{sgf_move}]\n')
+        self.sgf.append(';{0}[{1}]\n'.format(our_letter, sgf_move))
 
     def play_their_move(self):
         their_name = self.their_color.name
         their_letter = their_name[0].upper()
 
-        pos = self.command_and_response(f'genmove {their_name}\n')
+        pos = self.command_and_response('genmove {}\n'.format(their_name))
 
         if pos.lower() == 'resign':
             self.game_state = self.game_state.apply_move(Move.resign())
             self._stopped = True
         elif pos.lower() == 'pass':
             self.game_state = self.game_state.apply_move(Move.pass_turn())
-            self.sgf.append(f';{their_letter}[]\n')
+            self.sgf.append(';{}[]\n'.format(their_letter))
 
             if self.game_state.last_move.is_pass:
                 self._stopped = True
@@ -134,19 +134,14 @@ class LocalGtpBot:
             move = gtp_position_to_coords(pos)
 
             self.game_state = self.game_state.apply_move(move)
-            self.sgf.append(f';{their_letter}[{self.sgf.coordinates(move)}]\n')
+            self.sgf.append(';{0}[{1}]\n'.format(their_letter, self.sgf.coordinates(move)))
 
 
 if __name__ == "__main__":
     import sys
-
     sys.path.append('../../')
 
-    # betago.hdf5 is referenced by book, but no betago bot at this point
-    # todo: implement betago bot?
-    # bot = load_prediction_agent(h5py.File('../../agents/betago.hdf5', 'r'))
-    bot = load_prediction_agent(h5py.File('../../alphago/alphago_rl_policy.h5', 'r'))
-
-    #gnu_go = LocalGtpBot(go_bot=bot, termination=PassWhenOpponentPasses(), handicap=0, opponent='pachi')
-    gnu_go = LocalGtpBot(go_bot=bot, termination=PassWhenOpponentPasses(), handicap=8, opponent='gnugo', our_color='b')
+    # change path of bot u want to play against
+    bot = load_prediction_agent(h5py.File('../../alphago/alphago_sl_policy_e13_1k.h5', 'r'))
+    gnu_go = LocalGtpBot(go_bot=bot, termination=PassWhenOpponentPasses(), handicap=0, opponent='gnugo', our_color='b')
     gnu_go.run()
