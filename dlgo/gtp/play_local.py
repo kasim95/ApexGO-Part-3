@@ -72,7 +72,7 @@ class LocalGtpBot:
             self.command_and_response('komi 7.5\n')
             self.sgf.append('KM[7.5]\n')
         else:
-            stones = self.command_and_response(f'fixed handicap {self.handicap}\n')
+            stones = self.command_and_response(f'fixed_handicap {self.handicap}\n')
             sgf_handicap = "HA[{}]AB".format(self.handicap)
 
             for pos in stones.split(' '):
@@ -145,8 +145,8 @@ if __name__ == "__main__":
     # betago.hdf5 is referenced by book, but no betago bot at this point
     # todo: implement betago bot?
     # bot = load_prediction_agent(h5py.File('../../agents/betago.hdf5', 'r'))
-    bot = load_prediction_agent(h5py.File('../../agents/deep_bot.h5', 'r'))
+    bot = load_prediction_agent(h5py.File('../../alphago/alphago_rl_policy.h5', 'r'))
 
     #gnu_go = LocalGtpBot(go_bot=bot, termination=PassWhenOpponentPasses(), handicap=0, opponent='pachi')
-    gnu_go = LocalGtpBot(go_bot=bot, termination=PassWhenOpponentPasses(), handicap=0, opponent='gnugo')
+    gnu_go = LocalGtpBot(go_bot=bot, termination=PassWhenOpponentPasses(), handicap=8, opponent='gnugo', our_color='b')
     gnu_go.run()
