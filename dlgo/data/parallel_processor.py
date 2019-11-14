@@ -64,7 +64,7 @@ class GoDataProcessor:
         feature_file_base = self.data_dir + '/' + data_file_name + '_features_%d'
         label_file_base = self.data_dir + '/' + data_file_name + '_labels_%d'
 
-        print(f"processing {data_file_name}...")
+        print("processing {}...".format(data_file_name))
 
         tar_file = self.unzip_data(zip_file_name)
         zip_file = tarfile.open(self.data_dir + '/' + tar_file)
@@ -126,10 +126,10 @@ class GoDataProcessor:
             current_labels, labels = labels[:chunksize], labels[chunksize:]
 
             np.save(feature_file, current_features)
-            print(f'wrote {feature_file}')
+            print('wrote {}'.format(feature_file))
 
             np.save(label_file, current_labels)
-            print(f'wrote {label_file}')
+            print('wrote {}'.format(label_file))
 
         # allow garbage collection
         features = None
