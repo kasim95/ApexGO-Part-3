@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../')
 from dlgo.data.parallel_processor import GoDataProcessor
 from dlgo.encoders.alphago import AlphaGoEncoder
 from dlgo.agent.predict import DeepLearningAgent
@@ -8,7 +10,7 @@ import h5py
 
 ROWS, COLS = 19, 19
 NUM_CLASSES = ROWS * COLS
-NUM_GAMES = 10000
+NUM_GAMES = 2000
 
 
 def main():
@@ -34,7 +36,7 @@ def main():
                               metrics=['accuracy'])
 
     # sl train
-    epochs = 200
+    epochs = 100
     batch_size = 128
     alphago_sl_policy.fit_generator(
         generator=generator.generate(batch_size, NUM_CLASSES),
@@ -42,7 +44,7 @@ def main():
         steps_per_epoch=generator.get_num_samples() / batch_size,
         validation_data=test_generator.generate(batch_size, NUM_CLASSES),
         validation_steps=test_generator.get_num_samples()/batch_size,
-        callbacks=[ModelCheckpoint('alphago_sl_policy{epoch}.h5')]
+        callbacks=[ModelCheckpoint('alphago_sl_policy_{epoch}.h5')]
     )
     alphago_sl_agent = DeepLearningAgent(alphago_sl_policy, encoder)
 

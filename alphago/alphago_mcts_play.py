@@ -1,7 +1,11 @@
+import sys
+sys.path.append('../')
+
 from dlgo.agent import load_prediction_agent, load_policy_agent, AlphaGoMCTS
 from dlgo.rl import load_value_agent
 import h5py
 from dlgo import httpfrontend
+
 
 # 13.4 end
 fast_policy = load_prediction_agent(h5py.File('alphago_sl_policy.h5', 'r'))

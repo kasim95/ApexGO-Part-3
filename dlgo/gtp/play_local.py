@@ -145,8 +145,9 @@ if __name__ == "__main__":
     # betago.hdf5 is referenced by book, but no betago bot at this point
     # todo: implement betago bot?
     # bot = load_prediction_agent(h5py.File('../../agents/betago.hdf5', 'r'))
-    bot = load_prediction_agent(h5py.File('../../agents/deep_bot.h5', 'r'))
+    # bot = load_prediction_agent(h5py.File('../../alphago/alphago_sl_aries_e1_5k_a12/alphago_sl_policy_e1_5k.h5', 'r'))
+    bot = load_prediction_agent(h5py.File('../../alphago/alphago_sl_policy_e13_1k.h5', 'r'))
 
     #gnu_go = LocalGtpBot(go_bot=bot, termination=PassWhenOpponentPasses(), handicap=0, opponent='pachi')
-    gnu_go = LocalGtpBot(go_bot=bot, termination=PassWhenOpponentPasses(), handicap=0, opponent='gnugo')
+    gnu_go = LocalGtpBot(go_bot=bot, termination=PassWhenOpponentPasses(), handicap=4, opponent='gnugo')
     gnu_go.run()

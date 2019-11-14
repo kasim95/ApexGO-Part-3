@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../')
+
 from dlgo.networks.alphago import alphago_model
 from dlgo.encoders.alphago import AlphaGoEncoder
 from dlgo.rl import ValueAgent, load_experience

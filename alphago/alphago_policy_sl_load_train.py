@@ -1,3 +1,6 @@
+import sys
+sys.path.apppend('../')
+
 from dlgo.data.parallel_processor import GoDataProcessor
 from dlgo.encoders.alphago import AlphaGoEncoder
 from dlgo.agent.predict import DeepLearningAgent
@@ -8,7 +11,7 @@ import h5py
 
 ROWS, COLS = 19, 19
 NUM_CLASSES = ROWS * COLS
-NUM_GAMES = 10000
+NUM_GAMES = 100
 
 
 def main():
