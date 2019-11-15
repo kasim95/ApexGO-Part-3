@@ -160,7 +160,12 @@ function applyMove(player, coord) {
       if(play.ko)
         node.setMark(play.ko, JGO.MARK.CIRCLE); // mark ko, too
       ko = play.ko;
-    } else alert('Illegal move: ' + play.errorMsg);
+    } else {
+      alert('Illegal move: ' + play.errorMsg);
+      console.log('Illegal move: ' + player + ', ' + coordsToString(coord) + ', reason: ' + play.errorMsg);
+    }
+
+    return play.success
 }
 
 function waitForBot() {
@@ -181,6 +186,8 @@ function stopWaiting(botmove) {
     document.getElementById('status').style.display = 'block';
     document.getElementById('spinner').style.display = 'none';
     waitingForBot = false;
+
+    console.log(text);
 }
 
 jsetup.setOptions({stars: {points:5}});
@@ -208,9 +215,17 @@ jsetup.create('board', function(canvas) {
     lastHover = false;
 
     console.log('Human', coordsToString(coord));
-    applyMove(JGO.BLACK, coord);
+
+
+    if (applyMove(JGO.BLACK, coord)) {
+      //console.log("applied human move");
+    } else {
+      console.log("player attempted illegal move");
+      return;
+    }
 
     waitForBot();
+
     fetch('/select-move/predict', {
         method: 'POST',
         headers: {
@@ -227,8 +242,13 @@ jsetup.create('board', function(canvas) {
                 record.push(data.bot_move);
             } else {
                 var botCoord = stringToCoords(data.bot_move);
-                applyMove(JGO.WHITE, botCoord);
+                if (applyMove(JGO.WHITE, botCoord)) {
+                } else {
+                   console.log("*** bot attempted an illegal move! " + botCoord.i + "," + botCoord.j);
+                   console.log("*** bot move was ", data.bot_move);
+                }
             }
+
             stopWaiting(data.bot_move);
         });
     }).catch(function(error) {

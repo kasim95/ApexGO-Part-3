@@ -458,9 +458,18 @@ Board.prototype.playMove = function(coord, stone, ko) {
   if(!coord) // pass
     return { success: true, captures: [], ko: false };
 
-  if(this.getType(coord) != C.CLEAR)
-    return { success: false,
-      errorMsg: 'Cannot play on existing stone!' };
+  if(this.getType(coord) != C.CLEAR) {
+    stone = this.getType(coord);
+
+    // a stone exists here: if it's black or white, invalid move
+
+    if (stone != C.BLACK && stone != C.WHITE) {
+       // dim stone, black or white
+    } else {
+       return { success: false,
+          errorMsg: 'Cannot play on existing stone!' };
+    }
+  }
 
   if(ko && coord.equals(ko))
     return { success: false,
@@ -485,10 +494,19 @@ Board.prototype.playMove = function(coord, stone, ko) {
   }
 
   // Suicide not allowed
+//  if(captures.length === 0 &&
+//      !this.hasType(this.getGroup(coord, stone).neighbors, C.CLEAR))
+//    return { success: false,
+//      errorMsg: 'Suicide is not allowed!' };
+
+  // technically the preview stone(s) is on the board, so avoiding suicide with zero captures means at least
+  // one neighbor is clear or dim
   if(captures.length === 0 &&
-      !this.hasType(this.getGroup(coord, stone).neighbors, C.CLEAR))
-    return { success: false,
-      errorMsg: 'Suicide is not allowed!' };
+     !this.hasType(this.getGroup(coord, stone).neighbors, C.CLEAR) &&
+      !this.hasType(this.getGroup(coord, stone).neighbors, C.DIM_BLACK) &&
+       !this.hasType(this.getGroup(coord, stone).neighbors, C.DIM_WHITE)) {
+           return { success: false, errorMsg: 'Suicide is not allowed!' };
+  }
 
   // Check for ko. Note that captures were not removed so there should
   // be zero liberties around this stone in case of a ko. Also, if the
