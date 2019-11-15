@@ -69,37 +69,43 @@ class ZeroAgent(Agent):
         self.collector = None
 
     def select_move(self, game_state):
-        root = self.create_node(game_state)
+        root = self.create_node(game_state)  # <1>
 
-        for i in range(self.num_rounds):
+        for i in range(self.num_rounds):  # <2>
             node = root
             next_move = self.select_branch(node)
-
-            while node.has_child(next_move):
+            while node.has_child(next_move):  # <3>
                 node = node.get_child(next_move)
                 next_move = self.select_branch(node)
+            # end::zero_walk_down[]
 
+            # tag::zero_back_up[]
             new_state = node.state.apply_move(next_move)
-            child_node = self.create_node(new_state, move=next_move, parent=node)
+            child_node = self.create_node(
+                new_state, parent=node)
 
             move = next_move
-            value = -1 * child_node.value
-
+            value = -1 * child_node.value  # <1>
             while node is not None:
                 node.record_visit(move, value)
                 move = node.last_move
                 node = node.parent
                 value = -1 * value
+        # end::zero_back_up[]
 
+        # tag::zero_record_collector[]
         if self.collector is not None:
             root_state_tensor = self.encoder.encode(game_state)
-
             visit_counts = np.array([
-                root.visit_count(self.encoder.decode_move_index(idx)) for idx in range(self.encoder.num_moves())
+                root.visit_count(
+                    self.encoder.decode_move_index(idx))
+                for idx in range(self.encoder.num_moves())
             ])
+            self.collector.record_decision(
+                root_state_tensor, visit_counts)
+        # end::zero_record_collector[]
 
-            self.collector.record_decision(root_state_tensor, visit_counts)
-
+        # tag::zero_select_max_visit_count[]
         return max(root.moves(), key=root.visit_count)
 
     def set_collector(self, collector):
@@ -109,19 +115,23 @@ class ZeroAgent(Agent):
         state_tensor = self.encoder.encode(game_state)
         model_input = np.array([state_tensor])
         priors, values = self.model.predict(model_input)
-
         priors = priors[0]
+
+        # add Dirichlet noise to encourage exploration
+        if parent is None:
+            noise = np.random.dirichlet(0.03 * np.ones_like(priors))
+            priors = 0.75 * priors + 0.25 * noise
+
         value = values[0][0]
 
         move_priors = {
-            self.encoder.decode_move_index(idx): p for idx, p in enumerate(priors)
+            self.encoder.decode_move_index(idx): p
+            for idx, p in enumerate(priors)
         }
-
         new_node = ZeroTreeNode(game_state, value, move_priors, parent, move)
 
         if parent is not None:
             parent.add_child(move, new_node)
-
         return new_node
 
     def select_branch(self, node):

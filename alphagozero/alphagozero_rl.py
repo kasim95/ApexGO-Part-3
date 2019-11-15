@@ -1,3 +1,5 @@
+import time
+
 from keras.layers import Conv2D, Flatten, Dense
 from keras.models import Model, Input
 
@@ -56,14 +58,25 @@ def run():
 
     model = Model(inputs=[board_input], outputs=[policy_output, value_output])
 
-    black_agent = zero.ZeroAgent(model, encoder, rounds_per_move=10, c=2.0)
-    white_agent = zero.ZeroAgent(model, encoder, rounds_per_move=10, c=2.0)
+    black_agent = zero.ZeroAgent(model, encoder, rounds_per_move=100, c=2.0)
+    white_agent = zero.ZeroAgent(model, encoder, rounds_per_move=100, c=2.0)
 
     c1 = zero.ZeroExperienceCollector()
     c2 = zero.ZeroExperienceCollector()
 
-    for i in range(5):
+    black_agent.set_collector(c1)
+    white_agent.set_collector(c2)
+
+    num_games = 1
+
+    for i in range(num_games):
+        print(f'Game {i+1}/{num_games}')
+        start_time = time.time()
         simulate_game(board_size, black_agent, c1, white_agent, c2)
+
+        elapsed = time.time() - start_time
+        print(f'elapsed: {elapsed} s')
+        print(f'estimated time remaining this session: {(num_games - (i + 1)) * elapsed} s')
 
     exp = zero.combine_experience([c1, c2])
     black_agent.train(exp, 0.01, 2048)
