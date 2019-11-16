@@ -1,5 +1,5 @@
-import sys
-sys.path.append('../')
+# import sys
+# sys.path.append('../')
 
 from dlgo.agent.pg import PolicyAgent
 from dlgo.agent.predict import load_prediction_agent
