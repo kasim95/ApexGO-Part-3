@@ -1,6 +1,9 @@
 import numpy as np
 from keras.optimizers import SGD
+from dlgo import kerasutil
 from dlgo.agent import Agent
+from dlgo.encoders import get_encoder_by_name
+from dlgo.zero.encoder import ZeroEncoder
 
 
 class Branch:
@@ -69,31 +72,27 @@ class ZeroAgent(Agent):
         self.collector = None
 
     def select_move(self, game_state):
-        root = self.create_node(game_state)  # <1>
+        root = self.create_node(game_state)
 
-        for i in range(self.num_rounds):  # <2>
+        for i in range(self.num_rounds):
             node = root
             next_move = self.select_branch(node)
-            while node.has_child(next_move):  # <3>
+            while node.has_child(next_move):
                 node = node.get_child(next_move)
                 next_move = self.select_branch(node)
-            # end::zero_walk_down[]
 
-            # tag::zero_back_up[]
             new_state = node.state.apply_move(next_move)
             child_node = self.create_node(
                 new_state, parent=node)
 
             move = next_move
-            value = -1 * child_node.value  # <1>
+            value = -1 * child_node.value
             while node is not None:
                 node.record_visit(move, value)
                 move = node.last_move
                 node = node.parent
                 value = -1 * value
-        # end::zero_back_up[]
 
-        # tag::zero_record_collector[]
         if self.collector is not None:
             root_state_tensor = self.encoder.encode(game_state)
             visit_counts = np.array([
@@ -103,9 +102,7 @@ class ZeroAgent(Agent):
             ])
             self.collector.record_decision(
                 root_state_tensor, visit_counts)
-        # end::zero_record_collector[]
 
-        # tag::zero_select_max_visit_count[]
         return max(root.moves(), key=root.visit_count)
 
     def set_collector(self, collector):
@@ -157,5 +154,31 @@ class ZeroAgent(Agent):
         value_target = experience.rewards
 
         self.model.compile(SGD(lr=learning_rate), loss=['categorical_crossentropy', 'mse'])
-
         self.model.fit(model_input, [action_target, value_target], batch_size=batch_size)
+
+    def serialize(self, h5file):
+        h5file.create_group('encoder')  # stores enough information to reconstruct the board encoder
+        h5file.create_group('meta')
+
+        h5file['encoder'].attrs['name'] = 'zeroencoder'
+        h5file['encoder'].attrs['board_size'] = self.encoder.board_size
+        h5file['meta'].attrs['num_rounds'] = self.num_rounds
+        h5file['meta'].attrs['c'] = self.c
+
+        h5file.create_group('model')    # Uses built in Keras features to persist the model and its weights
+        kerasutil.save_model_to_hdf5_group(
+            self.model, h5file['model'])
+
+
+def load_zero_agent(h5file):
+    model = kerasutil.load_model_from_hdf5_group(
+        h5file['model'])    # Uses built in Keras functions to load the model structure and weights
+    encoder_name = h5file['encoder'].attrs['name']      # Recovers the board encoder
+    board_size= h5file['encoder'].attrs['board_size']
+    num_rounds = h5file['meta'].attrs['num_rounds']
+    c = h5file['meta'].attrs['c']
+
+    # zero encoder isn't in dlgo.encoders ... should it be?
+    encoder = ZeroEncoder(board_size)
+
+    return ZeroAgent(model, encoder, num_rounds, c)

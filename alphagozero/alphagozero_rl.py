@@ -3,6 +3,8 @@ import time
 from keras.layers import Conv2D, Flatten, Dense
 from keras.models import Model, Input
 
+import h5py
+
 import dlgo.zero as zero
 from dlgo.goboard_fast import GameState
 from dlgo.gotypes import Player
@@ -41,7 +43,7 @@ def run():
     board_input = Input(shape=encoder.shape(), name='board_input')
     pb = board_input
 
-    for i in range(4):
+    for i in range(16):
         pb = Conv2D(64, (3, 3), padding='same', data_format='channels_first', activation='relu')(pb)
 
     policy_conv = Conv2D(2, (1, 1), data_format='channels_first', activation='relu')(pb)
@@ -58,8 +60,8 @@ def run():
 
     model = Model(inputs=[board_input], outputs=[policy_output, value_output])
 
-    black_agent = zero.ZeroAgent(model, encoder, rounds_per_move=100, c=2.0)
-    white_agent = zero.ZeroAgent(model, encoder, rounds_per_move=100, c=2.0)
+    black_agent = zero.ZeroAgent(model, encoder, rounds_per_move=10, c=2.0)
+    white_agent = zero.ZeroAgent(model, encoder, rounds_per_move=10, c=2.0)
 
     c1 = zero.ZeroExperienceCollector()
     c2 = zero.ZeroExperienceCollector()
@@ -67,7 +69,7 @@ def run():
     black_agent.set_collector(c1)
     white_agent.set_collector(c2)
 
-    num_games = 1
+    num_games = 10
 
     for i in range(num_games):
         print(f'Game {i+1}/{num_games}')
@@ -78,8 +80,11 @@ def run():
         print(f'elapsed: {elapsed} s')
         print(f'estimated time remaining this session: {(num_games - (i + 1)) * elapsed} s')
 
-    exp = zero.combine_experience([c1, c2])
-    black_agent.train(exp, 0.01, 2048)
+    exp = zero.combine_experience([c1, c2], board_size)
+    black_agent.train(exp, 0.01, 1024)
+
+    with h5py.File('agz_experience.h5', 'a') as expfile:
+        exp.serialize(expfile)
 
 
 if __name__ == '__main__':
