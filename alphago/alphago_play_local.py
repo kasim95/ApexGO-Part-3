@@ -143,12 +143,12 @@ if __name__ == "__main__":
     import sys
     sys.path.append('../../')
 
-    import tensorflow as tf
-    from keras.backend.tensorflow_backend import set_session
+    # import tensorflow as tf
+    # from keras.backend.tensorflow_backend import set_session
 
-    config = tf.ConfigProto()
-    config.gpu_options.per_process_gpu_memory_fraction = 0.3
-    set_session(tf.Session(config=config))
+    # config = tf.ConfigProto()
+    # config.gpu_options.per_process_gpu_memory_fraction = 0.3
+    # set_session(tf.Session(config=config))
 
     # change path of bot u want to play against
     # bot = load_prediction_agent(h5py.File('../../alphago/alphago_sl_policy_e13_1k.h5', 'r'))
