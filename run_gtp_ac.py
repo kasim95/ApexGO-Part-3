@@ -1,3 +1,4 @@
+#!/usr/bin/python2
 from dlgo.gtp import GTPFrontend
 from dlgo.rl.ac import load_ac_agent
 from dlgo.agent import termination
