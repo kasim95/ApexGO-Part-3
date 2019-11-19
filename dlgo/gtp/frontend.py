@@ -92,7 +92,7 @@ class GTPFrontend:
         return response.bool_response(command_name in self.handlers.keys())
 
     @staticmethod
-    def handle_boardsize(self, size):
+    def handle_boardsize(size):
         if int(size) != 19:
             return response.error('Only 19x19 currently supported, requested {}'.format(size))
         return response.success()
@@ -102,12 +102,12 @@ class GTPFrontend:
         return response.success()
 
     @staticmethod
-    def handle_time_left(self, color, time, stones):
+    def handle_time_left(color, time, stones):
         # TODO: Arguments: color color, int time, int stones
         return GTPFrontend.not_implemented_but_respond_success("time_left")
 
     @staticmethod
-    def handle_time_settings(self, main_time, byo_yomi_time, byo_yomi_stones):
+    def handle_time_settings(main_time, byo_yomi_time, byo_yomi_stones):
         # TODO: Arguments: int main_time, int byo_yomi_time, int byo_yomi_stones
         return GTPFrontend.not_implemented_but_respond_success("time_settings")
 
@@ -116,14 +116,14 @@ class GTPFrontend:
         return response.error('Unrecognized command')
 
     @staticmethod
-    def ignore(self, *args):
+    def ignore(*args):
         return response.success()
 
     @staticmethod
-    def handle_protocol_version(self):
+    def handle_protocol_version():
         return response.success('2')
 
     @staticmethod
-    def not_implemented_but_respond_success(self, fn_name):
+    def not_implemented_but_respond_success(fn_name):
         print(f'Received {fn_name} command but it is not implemented by this frontend')
         return response.success()
