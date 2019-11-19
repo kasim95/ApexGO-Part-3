@@ -11,7 +11,7 @@ class Command:
         return self.sequence == other.sequence and self.name == other.name and self.args == other.args
 
     def __repr__(self):
-        return 'Command({0}, {1}, {2})'.format(self.sequence, self.name, self.args)
+        return f'Command({self.sequence}, {self.name}, {self.args})'
 
     def __str__(self):
         return repr(self)

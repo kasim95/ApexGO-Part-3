@@ -125,5 +125,5 @@ class GTPFrontend:
 
     @staticmethod
     def not_implemented_but_respond_success(fn_name):
-        print('Received {} command but it is not implemented by this frontend'.format(fn_name))
+        print(f'Received {fn_name} command but it is not implemented by this frontend')
         return response.success()
