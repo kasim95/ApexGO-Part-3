@@ -6,4 +6,5 @@ from .pg import *
 from .termination import *
 from .alphago import *
 
-__all__ = ['helpers', 'naive', 'base', 'Agent', 'DeepLearningAgent']
+__all__ = ['helpers', 'naive', 'base', 'Agent', 'DeepLearningAgent', 'load_policy_agent', 'load_prediction_agent',
+           'AlphaGoMCTS']

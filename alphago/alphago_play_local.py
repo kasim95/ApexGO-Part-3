@@ -3,7 +3,6 @@ import subprocess
 import re
 import h5py
 
-from dlgo.agent.predict import load_prediction_agent
 from dlgo.agent.termination import PassWhenOpponentPasses, TerminationAgent
 from dlgo.goboard_fast import GameState, Move
 from dlgo.gotypes import Player
@@ -11,6 +10,7 @@ from dlgo.gtp.board import gtp_position_to_coords, coords_to_gtp_position
 from dlgo.gtp.gtp_utils import SGFWriter
 from dlgo.scoring import compute_game_result
 from dlgo.utils import print_board
+from dlgo.agent import load_prediction_agent, load_policy_agent, AlphaGoMCTS
 from dlgo.rl import load_value_agent
 
 
@@ -162,7 +162,6 @@ if __name__ == "__main__":
     strong_policy = load_policy_agent(h5py.File('alphago_rl_policy_e20_2k.h5', 'r'))
     value = load_value_agent(h5py.File('alphago_value_e20_2k.h5', 'r'))
 
-    alphago = AlphaGoMCTS(strong_policy, fast_policy, value, lambda_value=0.5, num_simulations=10, depth=10, rollout_limit=1)
-
+    alphago = AlphaGoMCTS(strong_policy, fast_policy, value, lambda_value=0.5, num_simulations=5, depth=3, rollout_limit=10)
     gnu_go = LocalGtpBot(go_bot=alphago, termination=PassWhenOpponentPasses(), handicap=0, opponent='gnugo', our_color='w')
     gnu_go.run()
