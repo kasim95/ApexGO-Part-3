@@ -103,6 +103,13 @@ class ZeroAgent(Agent):
             self.collector.record_decision(
                 root_state_tensor, visit_counts)
 
+        root_state_tensor = self.encoder.encode(game_state)
+        visit_counts = np.array([
+            root.visit_count(
+                self.encoder.decode_move_index(idx))
+            for idx in range(self.encoder.num_moves())
+        ])
+
         return max(root.moves(), key=root.visit_count)
 
     def set_collector(self, collector):

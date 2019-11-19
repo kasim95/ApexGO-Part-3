@@ -1,0 +1,1 @@
+python -m cProfile -o profile.dat alphago/alphago_play_local.py && echo "Generating report ..." && gprof2dot -f pstats profile.dat | dot -Tsvg -o profile.svg

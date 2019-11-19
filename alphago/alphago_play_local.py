@@ -11,7 +11,6 @@ from dlgo.gtp.board import gtp_position_to_coords, coords_to_gtp_position
 from dlgo.gtp.gtp_utils import SGFWriter
 from dlgo.scoring import compute_game_result
 from dlgo.utils import print_board
-from dlgo.agent import load_prediction_agent, load_policy_agent, AlphaGoMCTS
 from dlgo.rl import load_value_agent
 
 
@@ -97,6 +96,10 @@ class LocalGtpBot:
             print(compute_game_result(self.game_state))
 
     def play_our_move(self):
+        import time
+
+        start = time.time()
+
         move = self.bot.select_move(self.game_state)
         self.game_state = self.game_state.apply_move(move)
 
@@ -115,6 +118,8 @@ class LocalGtpBot:
             sgf_move = self.sgf.coordinates(move)
 
         self.sgf.append(';{0}[{1}]\n'.format(our_letter, sgf_move))
+
+        print(f'Took {time.time() - start} s to make our move')
 
     def play_their_move(self):
         their_name = self.their_color.name
@@ -157,7 +162,7 @@ if __name__ == "__main__":
     strong_policy = load_policy_agent(h5py.File('alphago_rl_policy_e20_2k.h5', 'r'))
     value = load_value_agent(h5py.File('alphago_value_e20_2k.h5', 'r'))
 
-    alphago = AlphaGoMCTS(strong_policy, fast_policy, value, lambda_value=0.5, num_simulations=5, depth=3, rollout_limit=10)
+    alphago = AlphaGoMCTS(strong_policy, fast_policy, value, lambda_value=0.5, num_simulations=10, depth=10, rollout_limit=1)
 
     gnu_go = LocalGtpBot(go_bot=alphago, termination=PassWhenOpponentPasses(), handicap=0, opponent='gnugo', our_color='w')
     gnu_go.run()

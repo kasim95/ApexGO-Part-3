@@ -1,62 +1,16 @@
 import os
 import sys
 import concurrent.futures
-import time
 import random
 
 from keras import backend as K
 
 import h5py
 import dlgo.zero as zero
-from dlgo.networks.zero import zero_model
 
 from dlgo.goboard_fast import GameState
 from dlgo.gotypes import Player
 from dlgo import scoring
-
-
-# def evaluate_network(known_best, learner, board_size, num_games=100, ratio=0.55):
-#     known_best_wins = 0
-#
-#     for game_idx in range(num_games):
-#         # learner needs to win at least 55% of the time
-#         # Therefore, if known best has won so many games that this is
-#         # impossible, exit early
-#         if known_best_wins / num_games >= 0.45:
-#             return known_best
-#         elif (game_idx - known_best_wins) / num_games >= 0.55:
-#             # for similar reasoning, we might be able to determine the learner is better early
-#             return learner
-#
-#         black_agent = random.choice([known_best, learner])
-#         white_agent = known_best if black_agent is learner else learner
-#
-#         agents = {
-#             Player.black: black_agent,
-#             Player.white: white_agent,
-#         }
-#
-#         game = GameState.new_game(board_size)
-#
-#         while not game.is_over():
-#             next_move = agents[game.next_player].select_move(game)
-#             game = game.apply_move(next_move)
-#
-#         game_result = scoring.compute_game_result(game)
-#
-#         print(f"game {game_idx + 1} result: {game_result}")
-#
-#         if game_result.winner == Player.black:
-#             if black_agent is known_best:
-#                 known_best_wins += 1
-#         else:
-#             if white_agent is known_best:
-#                 known_best_wins += 1
-#
-#     if known_best_wins / num_games >= 0.45:  # learner won < 0.55%, so not measurably stronger
-#         return known_best
-#     else:
-#         return learner
 
 
 def simulate():

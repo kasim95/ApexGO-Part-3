@@ -91,6 +91,9 @@ class AlphaGoMCTS(Agent):
             value = self.value.predict(current_state)
             rollout = self.policy_rollout(current_state)
 
+            if rollout == 1:
+                print("yay")
+
             # Determine the combined value function.
             weighted_value = (1 - self.lambda_value) * value + self.lambda_value * rollout
 
@@ -132,7 +135,7 @@ class AlphaGoMCTS(Agent):
             max_index, max_value = max(enumerate(valid_moves), key=operator.itemgetter(1))
             max_point = encoder.decode_point_index(max_index)
             greedy_move = Move(max_point)
-            if greedy_move in game_state.legal_moves():
+            if greedy_move in legal_moves:
                 game_state = game_state.apply_move(greedy_move)
 
         next_player = game_state.next_player
