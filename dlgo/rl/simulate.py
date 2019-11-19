@@ -1,10 +1,9 @@
-from dlgo import rl
+from dlgo.rl.experience import combine_experience
 from dlgo import scoring
 from dlgo import goboard_fast as goboard
 from dlgo.gotypes import Player
 
 from collections import namedtuple
-
 
 class GameRecord(namedtuple('GameRecord', 'moves winner margin')):
     pass
@@ -56,4 +55,4 @@ def experience_simulation(num_games, agent1, agent2):
             collector1.complete_episode(reward=-1)
         color1 = color1.other
 
-    return rl.combine_experience([collector1, collector2])
+    return combine_experience([collector1, collector2])

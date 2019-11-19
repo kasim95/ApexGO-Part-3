@@ -22,8 +22,8 @@ class PassWhenOpponentPasses(TerminationStrategy):
 
 class ResignLargeMargin(TerminationStrategy):
     def __init__(self, own_color, cut_off_move, margin):
-        super().__init__()
-
+        # super(TerminationStrategy).__init__()
+	TerminationStrategy.__init__(self)
         self.own_color = own_color
         self.cut_off_move = cut_off_move
         self.margin = margin
@@ -47,8 +47,8 @@ class ResignLargeMargin(TerminationStrategy):
 
 class TerminationAgent(Agent):
     def __init__(self, agent, strategy=None):
-        super().__init__()
-
+        # super(Agent).__init__()
+	Agent.__init__(self)
         self.agent = agent
         self.strategy = strategy if strategy is not None else TerminationStrategy()
 
