@@ -20,7 +20,7 @@ import h5py
 
 
 def find_start_index():
-    agent_files = glob.glob('agent/apex_agent_*.hdf5')
+    agent_files = glob.glob('data/apex_agent_*.hdf5')
     return len(agent_files)
 
 
@@ -30,16 +30,18 @@ def display_elapsed(start, msg):
 
 def main():
     # sl data
-    processor = GameProcessor()
-    processor.process_games()
+    # processor = GameProcessor()
+    # processor.process_games()
 
     experience_files = glob.glob('data/apexe_*.h5')
     iteration = 1
     cycles = 100
     agent_index = find_start_index() + 1
 
-    # todo: load from file
-    agent = ApexAgent(apex_model(19), ZeroEncoder(19))
+    if os.path.exists('data/apex_agent.hdf5'):
+        agent = load_apex_agent(h5py.File('data/apex_agent.hdf5'), 800, 2.0)
+    else:
+        agent = ApexAgent(apex_model(19), ZeroEncoder(19))
 
     while True:
         print(f'Beginning iteration {iteration}...')
@@ -53,7 +55,7 @@ def main():
         display_elapsed(start, 'loading experience')
         start = time.time()
 
-        agent.train(experience, 0.01, 512)
+        agent.train(experience, 0.01, 64)
         display_elapsed(start, 'training agent')
         start = time.time()
 
@@ -63,8 +65,12 @@ def main():
         with h5py.File(agent_path) as agent_file:
             agent.serialize(agent_file)
 
+        with h5py.File('data/apex_agent.hdf5') as best:
+            agent.serialize(best)
+
         display_elapsed(start, 'serializing agent')
         agent_index += 1
+
 
 if __name__ == '__main__':
     import multiprocessing
