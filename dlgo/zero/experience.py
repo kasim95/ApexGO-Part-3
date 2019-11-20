@@ -37,12 +37,16 @@ class ZeroExperienceBuffer:
     def serialize(self, h5file):
         if 'experience' not in h5file:
             h5file.create_group('experience')
+
             h5file['experience'].create_dataset('states', data=self.states,
-                                                maxshape=(None, 11, self.board_size, self.board_size), chunks=True)
+                                                maxshape=(None, 11, self.board_size, self.board_size), chunks=True,
+                                                compression='gzip', compression_opts=9)
             h5file['experience'].create_dataset('visit_counts', data=self.visit_counts,
-                                                maxshape=(None, self.board_size * self.board_size + 1), chunks=True)
+                                                maxshape=(None, self.board_size * self.board_size + 1), chunks=True,
+                                                compression='gzip', compression_opts=9)
             h5file['experience'].create_dataset('rewards', data=self.rewards,
-                                                maxshape=(None,), chunks=True)
+                                                maxshape=(None,), chunks=True,
+                                                compression='gzip', compression_opts=9)
             h5file['experience']['board_size'] = self.board_size
         else:
             states = h5file['experience']['states']

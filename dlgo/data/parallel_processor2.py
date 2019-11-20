@@ -33,7 +33,7 @@ def worker(jobinfo):
 class GoDataProcessor:
     def __init__(self, encoder='oneplane', data_directory='data'):
         self.encoder_string = encoder
-        self.encoder = get_encoder_by_name(encoder, 19)
+        self.encoder = get_encoder_by_name(encoder, 19) if type(encoder) == str else encoder
         self.data_dir = data_directory
 
     def load_go_data(self, data_type='train', num_samples=1000,

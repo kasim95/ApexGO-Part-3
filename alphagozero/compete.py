@@ -66,7 +66,7 @@ def run(board_size, first, second):
 
 if __name__ == '__main__':
 
-    with h5py.File('agz_bot.h5', 'r') as bot_file:
+    with h5py.File('alphagozero/agz_bot.h5', 'r') as bot_file:
         bot1 = zero.load_zero_agent(bot_file)
 
     # with h5py.File('agz_bot_i1_2stone_hc.h5', 'r') as bot_file:
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     import dlgo.agent
     bot2 = dlgo.agent.naive.RandomBot()
 
-    bot1.num_rounds = bot2.num_rounds = 1000
-    #bot1.c = bot2.c = 0.5
+    bot1.num_rounds = bot2.num_rounds = 200
+    bot1.c = bot2.c = 0.5
 
     run(19, bot1, bot2)
