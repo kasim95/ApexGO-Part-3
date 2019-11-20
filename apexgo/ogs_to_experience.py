@@ -16,7 +16,6 @@ from dlgo.gosgf import SgfGame
 from dlgo.goboard_fast import Board, GameState, Move
 from dlgo.gotypes import Player, Point
 from dlgo.data.index_processor import KGSIndex
-from dlgo.encoders.base import get_encoder_by_name
 from dlgo.zero.experience import ZeroExperienceCollector
 from .apexagent import ApexAgent
 from dlgo.zero.encoder import ZeroEncoder
@@ -38,7 +37,7 @@ class GameProcessor:
 
     def process_games(self):
         index = KGSIndex(data_directory=self.data_dir)
-        #index.download_files()
+        index.download_files()
 
         self.map_to_workers()
 
@@ -168,8 +167,7 @@ class GameProcessor:
             for i in range(num_games):
                 available_games.append((filename, i))
 
-        # temp
-        return available_games[:1]
+        return available_games
 
     def map_to_workers(self):
         zip_names = set()

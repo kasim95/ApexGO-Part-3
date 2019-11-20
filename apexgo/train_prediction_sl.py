@@ -30,10 +30,8 @@ def display_elapsed(start, msg):
 
 def main():
     # sl data
-    #encoder = ZeroEncoder(19)
-    #processor = GameProcessor()
-
-    #processor.process_games()
+    processor = GameProcessor()
+    processor.process_games()
 
     experience_files = glob.glob('data/apexe_*.h5')
     iteration = 1
