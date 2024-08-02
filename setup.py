@@ -8,7 +8,7 @@ setup(name='ApexGO_BOT',
       install_requires=[
             'numpy<=1.17.1',
             'tensorflow>=1.12.1',
-            'keras==2.3.1',
+            'keras==2.13.1',
             'gomill',
             'Flask>=0.10.1',
             'Flask-Cors',
